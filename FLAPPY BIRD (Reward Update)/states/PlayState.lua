@@ -1,0 +1,161 @@
+PlayState = Class{__includes = BaseState}
+
+PIPE_SPEED = 60
+PIPE_WIDTH = 70
+PIPE_HEIGHT = 288
+
+BIRD_WIDTH = 38
+BIRD_HEIGHT = 24
+
+local spawnPipes = math.random() * 1.5 + 1.2
+
+function PlayState:init()
+    self.bird = Bird()
+    self.pipePairs = {}
+    self.timer = 0
+
+    -- keeps track of score
+    self.score = 0
+
+    -- initialize our last recorded Y value for a gap placement to base other gaps off of
+    self.lastY = -PIPE_HEIGHT + math.random(80) + 20
+end
+
+function PlayState:update(dt)
+    if scrolling then
+        -- update timer for pipe spawning
+        self.timer = self.timer + dt
+
+        -- spawn a new pipe randomly (2nd Assignment)
+        if self.timer > spawnPipes then
+            -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+            -- no higher than 10 pixels below the top edge of the screen,
+            -- and no lower than a gap length (90 pixels) from the bottom
+            local y = math.max(-PIPE_HEIGHT + 10, 
+                math.min(self.lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
+            self.lastY = y
+
+            -- add a new pipe pair at the end of the screen at our new Y
+            table.insert(self.pipePairs, PipePair(y))
+
+            -- reset timer
+            self.timer = 0
+
+            spawnPipes = math.random() * 1.5 + 1.2
+        end
+
+        -- for every pair of pipes..
+        for k, pair in pairs(self.pipePairs) do
+            -- score a point if the pipe has gone past the bird to the left all the way
+            -- be sure to ignore it if it's already been scored
+            if not pair.scored then
+                if pair.x + PIPE_WIDTH < self.bird.x then
+                    self.score = self.score + 1
+                    pair.scored = true
+                
+                    -- score sound
+                    sounds.score:play()
+                end
+            end
+
+            -- update position of pair
+            pair:update(dt)
+        end
+
+        -- for every pair of pipes..
+        for k, pair in pairs(self.pipePairs) do
+            -- update position of pair
+            pair:update(dt)
+        end
+
+        -- we need this second loop, rather than deleting in the previous loop, because
+        -- modifying the table in-place without explicit keys will result in skipping the
+        -- next pipe, since all implicit keys (numerical indices) are automatically shifted
+        -- down after a table removal
+        for k, pair in pairs(self.pipePairs) do
+            if pair.remove then
+                table.remove(self.pipePairs, k)
+            end
+        end
+
+        -- update bird based on gravity and input
+        self.bird:update(dt)
+
+        -- simple collision between bird and all pipes in pairs
+        for k, pair in pairs(self.pipePairs) do
+            for l, pipe in pairs(pair.pipes) do
+                if self.bird:collides(pipe) then
+                    gStateMachine:change('score', {score = self.score})
+
+                    -- explosion sound and hurt sound
+                    sounds.explosion:play()
+                    sounds.hurt:play()
+                end
+            end
+        end
+
+        -- reset if we get to the ground
+        if self.bird.y > VIRTUAL_HEIGHT - 15 then
+            gStateMachine:change('score', {score = self.score})
+            
+            -- falling sound
+            sounds.splat:play()
+        end
+    end
+
+    -- pause of the game (4th Assignment)
+    if love.keyboard.wasPressed('p') then
+        if scrolling then
+            scrolling = false
+            
+            -- pauses the music, sound click pause
+            sounds.music:pause()
+            sounds.pause:play()
+            
+            -- stops the background and ground from scrolling
+            BACKGROUND_SCROLL_SPEED = 0
+            GROUND_SCROLL_SPEED = 0
+        else
+            scrolling = true
+
+            -- plays the music, sound click pause
+            sounds.music:play()
+            sounds.pause:play()
+
+            -- the background and ground resumes on scrolling
+            BACKGROUND_SCROLL_SPEED = 30
+            GROUND_SCROLL_SPEED = 60
+        end
+    end
+end
+
+function PlayState:render()
+    for k, pair in pairs(self.pipePairs) do
+        pair:render()
+    end
+    
+    love.graphics.setFont(flappyFont)
+    love.graphics.print('Score ' .. tostring(self.score), 8, 8)
+
+    self.bird:render()
+
+    if scrolling == false then
+        love.graphics.setFont(hugeFont)
+        love.graphics.printf('Paused', 0, 100, VIRTUAL_WIDTH, 'center')
+        love.graphics.setFont(mediumFont)
+        love.graphics.printf('Press P to resume', 0, 160, VIRTUAL_WIDTH, 'center')
+    end
+end
+
+function PlayState:enter()
+    -- if we're coming from death, restart scrolling
+    scrolling = true
+end
+
+--[[
+    Called when this state changes to another state.
+]]
+function PlayState:exit()
+    -- stop scrolling for the death/score screen
+    scrolling = false
+end
