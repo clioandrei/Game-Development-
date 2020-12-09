@@ -52,7 +52,7 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     -- sets the title of the application
-    love.window.setTitle('Twitty Bird')
+    love.window.setTitle('Flappy Bird')
 
     smallFont = love.graphics.newFont('fonts/font.ttf', 8)
     mediumFont = love.graphics.newFont('fonts/flappy.ttf', 14)
