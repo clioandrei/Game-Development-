@@ -11,8 +11,8 @@ require 'Paddle'
 require 'Ball'
 
 
-WINDOW_WIDTH = 720
-WINDOW_HEIGHT = 480
+WINDOW_WIDTH = 1080
+WINDOW_HEIGHT = 720
 
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
@@ -173,6 +173,7 @@ function love.update(dt)
     if gamestate == 'play' then
         ball:update(dt)
     end
+    
     player1:update(dt)
     player2:updateAI(dt, ball.y, ball.dy) 
 end
