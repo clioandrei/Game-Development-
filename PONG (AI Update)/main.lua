@@ -175,6 +175,8 @@ function love.update(dt)
     end
     
     player1:update(dt)
+    
+    -- ai update (Assignment)
     player2:updateAI(dt, ball.y, ball.dy) 
 end
 

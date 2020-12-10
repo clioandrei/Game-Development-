@@ -16,6 +16,7 @@ function Paddle:update(dt)
     end
 end
 
+-- ai update (Assignment)
 function Paddle:updateAI(dt, by, bdy)
     if self.dy < 0 then 
         self.y = math.max(0, by + bdy * dt)
