@@ -148,14 +148,14 @@ function love.update(dt)
 
         -- if we reach the left edge of the screen, go back to serve
         -- and update the score and serving player
-        if ball.x < 0 then
+        if ball.x < -4 then
             servingPlayer = 1
             player2Score = player2Score + 1
             sounds['score']:play()
 
             -- if we've reached a score of 10, the game is over; set the
             -- state to done so we can show the victory message
-            if player2Score == 3 then
+            if player2Score == 5 then
                 winningPlayer = 2
                 gameState = 'done'
             else
@@ -168,14 +168,14 @@ function love.update(dt)
         -- if we reach the right edge of the screen, go back to serve
         -- and update the score and serving player
         --left side
-        if ball.x > VIRTUAL_WIDTH then
+        if ball.x > VIRTUAL_WIDTH + 4 then
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
 
             -- if we've reached a score of 10, the game is over; set the
             -- state to done so we can show the victory message
-            if player1Score == 3 then
+            if player1Score == 5 then
                 winningPlayer = 1
                 gameState = 'done'
             else
@@ -195,7 +195,7 @@ function love.update(dt)
     else
         player1.dy = 0
     end
-
+    
     player1:update(dt)
 
     -- player 2 movement
@@ -283,7 +283,7 @@ function love.draw()
         love.graphics.printf('Welcome to Pong!', 0, 30, VIRTUAL_WIDTH, 'center')
         love.graphics.rectangle('line', VIRTUAL_WIDTH / 2 - 160, VIRTUAL_HEIGHT / 2 - 40, 320, 80)
         love.graphics.printf('Press Enter to start!', 0, VIRTUAL_HEIGHT / 2 - 6, VIRTUAL_WIDTH, 'center')
-        love.graphics.printf('Note: best of 3 points.', 0, VIRTUAL_HEIGHT/2 + 80, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Note: First to 5 points wins.', 0, VIRTUAL_HEIGHT/2 + 80, VIRTUAL_WIDTH, 'center')
 
 		-- To put up AI mode functions
 		if aiMode == false then
