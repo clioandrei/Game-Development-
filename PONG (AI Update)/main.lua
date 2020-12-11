@@ -37,9 +37,9 @@ function love.load()
     math.randomseed(os.time())
 
     -- initialize our nice-looking retro text fonts
-    smallFont = love.graphics.newFont('font.ttf', 10)
-    largeFont = love.graphics.newFont('font.ttf', 20)
-    scoreFont = love.graphics.newFont('font.ttf', 36)
+    smallFont = love.graphics.newFont('font.ttf', 8)
+    largeFont = love.graphics.newFont('font.ttf', 16)
+    scoreFont = love.graphics.newFont('font.ttf', 32)
     love.graphics.setFont(smallFont)
 
     -- set up our sound effects; later, we can just index this table and
@@ -60,8 +60,8 @@ function love.load()
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
-    player1 = Paddle(10, 30, 5, 30)
-    Player2 = Paddle(VIRTUAL_WIDTH - 15, VIRTUAL_HEIGHT - 30, 5, 30)
+    player1 = Paddle(10, 30, 5, 25)
+    player2 = Paddle(VIRTUAL_WIDTH - 15, VIRTUAL_HEIGHT - 30, 5, 25)
 
     -- place a ball in the middle of the screen
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
@@ -117,9 +117,9 @@ function love.update(dt)
 
             sounds['paddle_hit']:play()
         end
-        if ball:collides(Player2) then
+        if ball:collides(player2) then
             ball.dx = -ball.dx * 1.03
-            ball.x = Player2.x - 4
+            ball.x = player2.x - 4
 
             -- keep velocity going in the same direction, but randomize it
             if ball.dy < 0 then
@@ -148,7 +148,7 @@ function love.update(dt)
 
         -- if we reach the left edge of the screen, go back to serve
         -- and update the score and serving player
-        if ball.x < 12 then
+        if ball.x < 0 then
             servingPlayer = 1
             player2Score = player2Score + 1
             sounds['score']:play()
@@ -168,7 +168,7 @@ function love.update(dt)
         -- if we reach the right edge of the screen, go back to serve
         -- and update the score and serving player
         --left side
-        if ball.x > VIRTUAL_WIDTH - 12 then
+        if ball.x > VIRTUAL_WIDTH then
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
@@ -186,10 +186,8 @@ function love.update(dt)
         end
     end
 
-    --
     -- paddles can move no matter what state we're in
-    --
-    -- player 1
+    -- player 1 movement
     if love.keyboard.isDown('w') then
         player1.dy = -PADDLE_SPEED
     elseif love.keyboard.isDown('s') then
@@ -198,17 +196,21 @@ function love.update(dt)
         player1.dy = 0
     end
 
-    -- player 2
+    player1:update(dt)
+
+    -- player 2 movement
 	if aiMode == true then
-		Player2.y = ball.y
+		player2:updateAI(dt, ball.y, ball.dy) 
 	elseif aiMode == false then
     	if love.keyboard.isDown('up') then
-        	Player2.dy = -PADDLE_SPEED
+        	player2.dy = -PADDLE_SPEED
     	elseif love.keyboard.isDown('down') then
-        	Player2.dy = PADDLE_SPEED
+        	player2.dy = PADDLE_SPEED
     	else
-        	Player2.dy = 0
-    	end
+        	player2.dy = 0
+        end
+        
+        player2:update(dt)
 	end
 
     -- update our ball based on its DX and DY only if we're in play state;
@@ -216,9 +218,6 @@ function love.update(dt)
     if gameState == 'play' then
         ball:update(dt)
     end
-
-    player1:update(dt)
-    Player2:update(dt)
 end
 
 --[[
@@ -269,11 +268,10 @@ end
 ]]
 function love.draw()
     -- begin drawing with push, in our virtual resolution
-    love.graphics.setBackgroundColor(0, 0, 0)
     push:apply('start')
 
-	--love.graphics.clear(40/255, 45/255, 52/255, 255/255)
-
+    -- clear the screen with a specific color
+	love.graphics.clear(40/255, 45/255, 52/255, 255/255)
 
 	love.graphics.setLineWidth(2)
 
@@ -286,7 +284,7 @@ function love.draw()
         love.graphics.rectangle('line', VIRTUAL_WIDTH / 2 - 160, VIRTUAL_HEIGHT / 2 - 40, 320, 80)
         love.graphics.printf('Press Enter to start!', 0, VIRTUAL_HEIGHT / 2 - 6, VIRTUAL_WIDTH, 'center')
         love.graphics.printf('Note: best of 3 points.', 0, VIRTUAL_HEIGHT/2 + 80, VIRTUAL_WIDTH, 'center')
-        --love.graphics.printf('Press Enter to begin!', 0, 20, VIRTUAL_WIDTH, 'center')
+
 		-- To put up AI mode functions
 		if aiMode == false then
             love.graphics.setFont(smallFont)
@@ -302,7 +300,6 @@ function love.draw()
 		end
     elseif gameState == 'serve' then
         -- UI messages
-
         love.graphics.setFont(smallFont)
         love.graphics.setColor(255, 255, 255)
         love.graphics.printf("Player " .. tostring(servingPlayer) .. " serve next!\nPress enter when ready",
@@ -321,16 +318,15 @@ function love.draw()
         love.graphics.setFont(smallFont)
         love.graphics.printf('Press Enter to restart!', 0, VIRTUAL_HEIGHT/2 + 80, VIRTUAL_WIDTH, 'center')
         ball:render()
+
+        -- show the score before ball is rendered so it can move over the text
+        --displayScore()
         displayScore()
     end
 
-	--
-    -- show the score before ball is rendered so it can move over the text
-    --displayScore()
-
+	-- draws the paddles
     player1:render()
-    Player2:render()
-    --ball:render()
+    player2:render()
 
     -- display FPS for debugging; simply comment out to remove
     displayFPS()
