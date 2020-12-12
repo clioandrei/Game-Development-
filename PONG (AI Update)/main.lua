@@ -32,6 +32,8 @@ function love.load()
 
     -- set the title of our application window
     love.window.setTitle('Pong')
+    icon = love.image.newImageData('icon.png')
+    love.window.setIcon(icon)
 
     -- seed the RNG so that calls to random are always random
     math.randomseed(os.time())
@@ -195,12 +197,12 @@ function love.update(dt)
     else
         player1.dy = 0
     end
-    
+
     player1:update(dt)
 
     -- player 2 movement
 	if aiMode == true then
-		player2:updateAI(dt, ball.y, ball.dy) 
+		player2:updateAI(dt, ball.y, ball.dy)
 	elseif aiMode == false then
     	if love.keyboard.isDown('up') then
         	player2.dy = -PADDLE_SPEED
@@ -209,7 +211,7 @@ function love.update(dt)
     	else
         	player2.dy = 0
         end
-        
+
         player2:update(dt)
 	end
 
