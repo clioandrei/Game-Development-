@@ -168,7 +168,7 @@ function love.update(dt)
         -- if we reach the right edge of the screen, go back to serve
         -- and update the score and serving player
         --left side
-        if ball.x > VIRTUAL_WIDTH + 4 then
+        if ball.x > VIRTUAL_WIDTH then
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
