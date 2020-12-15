@@ -199,6 +199,7 @@ function love.update(dt)
     player1:update(dt)
 
     -- player 2 movement
+    -- ASSIGNMENT
 	if aiMode == true then
 		player2:updateAI(dt, ball.y, ball.dy) 
 	elseif aiMode == false then
@@ -227,6 +228,7 @@ end
     things to happen right away, just once, like when we want to quit.
 ]]
 function love.keypressed(key)
+    -- ASSIGNMENT 
     -- `key` will be whatever key this callback detected as pressed
     if key == 'escape' then
         -- the function LÖVE2D uses to quit the application
