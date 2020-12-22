@@ -298,7 +298,7 @@ function love.draw()
 			love.graphics.printf('AI Mode: ' .. tostring(aiMode), 0, 185, VIRTUAL_WIDTH, 'center')
 		elseif aiMode == true then
 			love.graphics.setFont(smallFont)
-			love.graphics.printf('To stop playing with the AI, press 1!', 0, 50, VIRTUAL_WIDTH, 'center')
+			love.graphics.printf('To play with another player, press 1!', 0, 50, VIRTUAL_WIDTH, 'center')
 			love.graphics.setFont(smallFont)
 			love.graphics.printf('AI Mode: ' .. tostring(aiMode), 0, 185, VIRTUAL_WIDTH, 'center')
 		end
